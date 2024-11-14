@@ -6,7 +6,12 @@
 
   // expose prop to load externally
   // https://svelte.dev/docs/svelte/$props
-  let { inputImageElement } = $props();
+  let {
+    inputImageUrl,
+    inputImageElement,
+    processedImageUrl,
+    processedImageCanvasElement,
+  } = $props();
 
   let isOpenCVLoaded = $state(false);
 
@@ -52,37 +57,22 @@
   });
 
   $effect(() => {
-    // reached
-    console.log(
-      "inputImageElement naturalWidth: ",
-      inputImageElement.naturalWidth,
-    );
-    console.log(
-      "inputImageElement naturalHeight: ",
-      inputImageElement.naturalHeight,
-    );
+    inputImageUrl;
 
-    if (!isOpenCVLoaded || !inputImageElement) return;
-    if (inputImageElement.naturalWidth == 0) return;
+    console.log("before");
 
-    // not reached
-    console.log(
-      "inputImageElement naturalWidth: ",
-      inputImageElement.naturalWidth,
-    );
-    console.log(
-      "inputImageElement naturalHeight: ",
-      inputImageElement.naturalHeight,
-    );
+    if (!isOpenCVLoaded || !inputImageUrl) return;
 
-    console.log("effect inputImageElement: ", inputImageElement);
+    if (inputImageElement.width == 0 || processedImageCanvasElement.width == 0)
+      return;
+
+    console.log("after");
+    console.log("processedImageUrl: ", processedImageUrl);
+
     processImage();
-    console.log("processed image");
   });
 
   function processImage() {
-    console.log("processing image");
-
     const inputMat = cv.imread(inputImageElement);
 
     console.log(
@@ -127,11 +117,7 @@
     const result = new cv.Mat();
     cv.bitwise_and(inputMat, inputMat, result, skinMask);
 
-    const canvasElement = document.getElementById(
-      "outputCanvas",
-    ) as HTMLCanvasElement;
-
-    cv.imshow(canvasElement, result);
+    cv.imshow(processedImageCanvasElement, result);
 
     // free allocations
     inputMat.delete();
@@ -142,6 +128,8 @@
     upperHSV.delete();
     skinMask.delete();
     result.delete();
+
+    console.log("processed image");
   }
 </script>
 

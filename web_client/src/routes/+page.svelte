@@ -8,13 +8,19 @@
 
   type ProcessingMode = "naive" | "machineLearning";
   let processingMode: ProcessingMode = $state("naive");
+  let processing: boolean = $state(false);
 
   const ENDPOINT = "/api/upload";
+
   let selectedFile: File | null = $state(null);
+
+  let inputImageUrl: string | null = $state(null);
   let inputImageElement: HTMLImageElement | null = $state(null);
-  let inputImageUrl: string = $state("");
-  let processing = $state(false);
-  let processedImageUrl: string = $state("");
+  let onLoadInputImageUrl: string | null = $state(null);
+
+  let processedImageUrl: string | null = $state(null);
+  let onLoadProcessedImageUrl: string | null = $state(null);
+  let processedImageCanvasElement: HTMLCanvasElement | null = $state(null);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -46,8 +52,6 @@
   function handleFileChange(event) {
     selectedFile = event.target.files[0];
     inputImageUrl = URL.createObjectURL(selectedFile);
-    processedImageUrl = "";
-    console.log("selected file name: ", selectedFile.name);
   }
 </script>
 
@@ -61,13 +65,16 @@
         >
       </Tabs.List>
     </Tabs.Root>
-    <div class="flex flex-row space-x-16 p-8 border-2 rounded border-white">
+    <div class="flex flex-row space-x-16 p-8 border-2 rounded">
       {#if processingMode === "naive"}
-        {#key inputImageUrl}
-          <div class="flex flex-col space-y-8 w-1/4 min-w-[200px]">
-            <ManualHsvProcessor {inputImageElement} />
-          </div>
-        {/key}
+        <div class="flex flex-col space-y-8 w-1/4 min-w-[200px]">
+          <ManualHsvProcessor
+            inputImageUrl={onLoadInputImageUrl}
+            {inputImageElement}
+            processedImageUrl={onLoadProcessedImageUrl}
+            {processedImageCanvasElement}
+          />
+        </div>
       {/if}
       <div class="flex flex-col space-y-4 items-center flex-grow">
         <input type="file" accept="image/*" onchange={handleFileChange} />
@@ -88,28 +95,38 @@
             </Button>
           </form>
         {/if}
-        <div class="flex flex-row space-x-4 mt-4">
-          <div
-            class="flex flex-col items-center max-w-[80vh] max-h-[80vh] overflow-hidden"
-          >
-            {#if inputImageUrl}
+        <div class="flex flex-row space-x-4">
+          {#if inputImageUrl}
+            <div class="flex flex-col space-y-4 items-center">
               <img
                 src={inputImageUrl}
-                alt="Input Image"
+                alt="Input Image Alt"
                 bind:this={inputImageElement}
-                class="w-full h-auto object-contain"
+                onload={() => {
+                  onLoadInputImageUrl = inputImageUrl;
+                  if (processingMode === "naive") {
+                    processedImageUrl = inputImageUrl;
+                    console.log("naive mode, setting processed image url");
+                  }
+                  console.log("loaded input image");
+                }}
               />
               <h2>Input Image</h2>
-            {/if}
-          </div>
-          <div
-            class="flex flex-col items-center max-w-[80vh] max-h-[80vh] overflow-hidden"
-          >
-            {#if processedImageUrl && processingMode === "machineLearning"}
-              <img src={processedImageUrl} alt="Processed Image" />
+            </div>
+          {/if}
+          // TODO fix rerendering issue
+          {#key processedImageUrl}
+            <div class="flex flex-col space-y-4 items-center">
+              <canvas
+                bind:this={processedImageCanvasElement}
+                onload={() => {
+                  onLoadProcessedImageUrl = processedImageUrl;
+                  console.log("loaded processed image");
+                }}
+              />
               <h2>Processed Image</h2>
-            {/if}
-          </div>
+            </div>
+          {/key}
         </div>
       </div>
     </div>
