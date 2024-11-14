@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Load and convert the image
-imagePath = 'images/000k9gtp50b3kj06bikpg230de34c.jpg'
+imagePath = '/home/pedro/downloads/trump.jpg'
 img = cv2.imread(imagePath)
 gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -19,9 +19,14 @@ face_classifier = cv2.CascadeClassifier(
 face = face_classifier.detectMultiScale(
     gray_image,  # Input image
     scaleFactor=1.1,  # Scale down the image be a certain factor
-    minNeighbors=5,  # Factor to reduce false positives
+    # 2-3 is a good value
+    minNeighbors=3,  # Factor to reduce false positives
     minSize=(40, 40)  # Minimum size of a face
 )
+
+if len(face) == 0:
+    print("no faces found")
+    exit(1)
 
 # Focus on the face
 rect = face[0]
@@ -81,4 +86,4 @@ alpha = np.uint8(alpha * 255)
 result = np.dstack((skin, alpha))
 
 # Write the result
-cv2.imwrite("test_auto.png", result)
+cv2.imwrite("result_trump.png", result)

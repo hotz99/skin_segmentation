@@ -7,7 +7,7 @@ def nothing(x):
 
 
 # Load the image
-image = cv2.imread('images/000k9gtp50b3kj06bikpg230de34c.jpg')
+image = cv2.imread('/home/pedro/downloads/trump.jpg')
 gray = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
 mean, std_dev = cv2.meanStdDev(gray)
 
@@ -87,7 +87,7 @@ while True:
         alpha = np.uint8(alpha * 255)
         result = np.dstack((skin, alpha))
 
-        cv2.imwrite("tests/result.png", result)
+        cv2.imwrite("result_range_trump.png", result)
         break
 
 # Close all windows
