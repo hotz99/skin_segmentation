@@ -3,6 +3,7 @@
   import { Slider } from "$lib/components/ui/slider";
   import * as Tabs from "$lib/components/ui/tabs";
   import { LoaderCircle } from "lucide-svelte";
+  import { Download } from "lucide-svelte";
 
   import ManualHsvProcessor from "$lib/components/manualHsvProcessor.svelte";
 
@@ -15,6 +16,8 @@
   let selectedFile: File | null = $state(null);
 
   let inputImageUrl: string | null = $state(null);
+  // TODO persist this to avoid losing the image when switching tabs
+  // use store ?
   let inputImageElement: HTMLImageElement | null = $state(null);
   let onLoadInputImageUrl: string | null = $state(null);
 
@@ -61,14 +64,18 @@
       return;
     }
 
-    const inputImageUrl = URL.createObjectURL(selectedFile);
+    inputImageUrl = URL.createObjectURL(selectedFile);
     inputImageElement.src = inputImageUrl;
 
+    if (processingMode !== "naive") {
+      return;
+    }
+
     inputImageElement.onload = () => {
-      processedImageCanvasElement.width = inputImageElement.naturalWidth;
-      processedImageCanvasElement.height = inputImageElement.naturalHeight;
-      onLoadInputImageUrl = inputImageUrl;
-    };
+        processedImageCanvasElement!.width = inputImageElement!.naturalWidth;
+        processedImageCanvasElement!.height = inputImageElement!.naturalHeight;
+        onLoadInputImageUrl = inputImageUrl;
+    } 
   }
 </script>
 
@@ -92,14 +99,28 @@
             {processedImageCanvasElement}
           />
         </div>
-        <div class="flex flex-col space-y-4 items-center border rounded">
+        <div class="relative group flex flex-col space-y-4 items-center border rounded">
           <canvas bind:this={processedImageCanvasElement}></canvas>
-          <h2>Processed Image</h2>
+            {#if onLoadInputImageUrl}
+              <div
+                class="absolute top-2 right-8 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                onclick={() => {
+                  console.log("download");
+                  const link = document.createElement("a");
+                  link.download = "my_image.png"; // File name
+                  link.href = processedImageCanvasElement!.toDataURL("image/png");
+                  link.click();
+                }}
+              >
+                <Download class="w-8 h-8"  />
+              </div>
+              <h2>Processed Image</h2>
+            {/if}
         </div>
       </div>
     {/if}
+    {#if processingMode === "machineLearning"}
     <div class="flex flex-col space-y-4 items-center flex-grow">
-      {#if processingMode === "machineLearning"}
         <form onsubmit={handleSubmit}>
           <Button type="submit" class="mt-6" disabled={!selectedFile}>
             {#if processing}
@@ -133,8 +154,7 @@
             </div>
           {/if}
         </div>
+      </div>
       {/if}
-      <div class="flex flex-row space-x-4"></div>
-    </div>
   </div>
 </div>
