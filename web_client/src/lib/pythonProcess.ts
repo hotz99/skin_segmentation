@@ -4,7 +4,8 @@ let pythonProcess: ChildProcessWithoutNullStreams | null = null;
 
 function getPythonProcess() {
   if (!pythonProcess) {
-    pythonProcess = spawn("python", ["/home/pedro/uni/year_2/ivp/skin_segmentation/u2net/main.py"], {
+    // TODO make path relative/dynamic
+    pythonProcess = spawn("python", ["/home/pedro/uni/year_2/ivp/project/skin_segmentation/u2net/main.py"], {
       stdio: ["pipe", "pipe", "pipe"]
     });
   }

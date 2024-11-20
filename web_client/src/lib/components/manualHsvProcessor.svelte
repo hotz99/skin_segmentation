@@ -6,12 +6,7 @@
 
   // expose prop to load externally
   // https://svelte.dev/docs/svelte/$props
-  let {
-    inputImageUrl,
-    inputImageElement,
-    processedImageUrl,
-    processedImageCanvasElement,
-  } = $props();
+  let { processedImageCanvasElement } = $props();
 
   let isOpenCVLoaded = $state(false);
 
@@ -57,30 +52,24 @@
   });
 
   $effect(() => {
-    inputImageUrl;
-
     console.log("before");
 
-    if (!isOpenCVLoaded || !inputImageUrl) return;
+    if (!isOpenCVLoaded || processedImageCanvasElement.width == 0) return;
 
-    if (inputImageElement.width == 0 || processedImageCanvasElement.width == 0)
-      return;
-
-    console.log("after");
-    console.log("processedImageUrl: ", processedImageUrl);
+    console.log(
+      "(hsvProcessor)canvas size: ",
+      processedImageCanvasElement!.width,
+      processedImageCanvasElement!.height,
+    );
 
     processImage();
   });
 
   function processImage() {
-    const inputMat = cv.imread(inputImageElement);
+    // input image content is drawn on the canvas at this point
+    const inputMat = cv.imread(processedImageCanvasElement);
 
-    console.log(
-      "inputMat has size ",
-      inputMat.size().width,
-      "x",
-      inputMat.size().height,
-    );
+    console.log("inputMat has size ", inputMat.width, "x", inputMat.height);
 
     // Mat() params: nRows, nCols, matType, Scalar(rDouble, gDouble, bDouble)
     const scalarMat = new cv.Mat(

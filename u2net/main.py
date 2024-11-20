@@ -2,9 +2,9 @@ import sys
 import uuid
 from PIL import Image
 from session import Session 
-
-WEAKER_MODEL_PATH = "/home/pedro/uni/year_2/ivp/skin_segmentation/u2net/skin_u2netp.onnx"
-STRONGER_MODEL_PATH = "/home/pedro/uni/year_2/ivp/skin_segmentation/u2net/skin_u2net.onnx"
+# TODO make paths relative/dynamic
+WEAKER_MODEL_PATH = "/home/pedro/uni/year_2/ivp/project/skin_segmentation/u2net/skin_u2netp.onnx"
+STRONGER_MODEL_PATH = "/home/pedro/uni/year_2/ivp/project/skin_segmentation/u2net/skin_u2net.onnx"
 
 session = Session(model_path=STRONGER_MODEL_PATH)
 
