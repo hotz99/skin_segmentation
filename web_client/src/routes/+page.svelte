@@ -51,7 +51,24 @@
 
   function handleFileChange(event) {
     selectedFile = event.target.files[0];
-    inputImageUrl = URL.createObjectURL(selectedFile);
+
+    if (!selectedFile) return;
+
+    inputImageElement = new Image();
+
+    if (!inputImageElement) {
+      console.log("no inputImageElement");
+      return;
+    }
+
+    const inputImageUrl = URL.createObjectURL(selectedFile);
+    inputImageElement.src = inputImageUrl;
+
+    inputImageElement.onload = () => {
+      processedImageCanvasElement.width = inputImageElement.naturalWidth;
+      processedImageCanvasElement.height = inputImageElement.naturalHeight;
+      onLoadInputImageUrl = inputImageUrl;
+    };
   }
 </script>
 
@@ -69,9 +86,13 @@
     {#if processingMode === "naive"}
       <div class="flex flex-row space-x-16 p-8 border-2 rounded">
         <div class="flex flex-col space-y-8 w-1/4 min-w-[200px]">
-          <ManualHsvProcessor {processedImageCanvasElement} />
+          <ManualHsvProcessor
+            inputImageUrl={onLoadInputImageUrl}
+            {inputImageElement}
+            {processedImageCanvasElement}
+          />
         </div>
-        <div class="flex flex-col space-y-4 items-center">
+        <div class="flex flex-col space-y-4 items-center border rounded">
           <canvas bind:this={processedImageCanvasElement}></canvas>
           <h2>Processed Image</h2>
         </div>
@@ -94,43 +115,24 @@
             {/if}
           </Button>
         </form>
-        {#if inputImageUrl}
-          <div class="flex flex-col space-y-4 items-center">
-            <img
-              src={inputImageUrl}
-              alt="Input Image Alt"
-              bind:this={inputImageElement}
-              onload={() => {
-                onLoadInputImageUrl = inputImageUrl;
-                if (processingMode === "naive") {
-                  processedImageUrl = inputImageUrl;
-                  console.log("naive mode, setting processed image url");
-
-                  processedImageCanvasElement!.width =
-                    inputImageElement!.naturalWidth;
-                  processedImageCanvasElement!.height =
-                    inputImageElement!.naturalHeight;
-
-                  console.log(
-                    "input image size: ",
-                    inputImageElement!.width,
-                    inputImageElement!.height,
-                  );
-
-                  console.log(
-                    "canvas size: ",
-                    processedImageCanvasElement!.width,
-                    processedImageCanvasElement!.height,
-                  );
-
-                  onLoadProcessedImageUrl = processedImageUrl;
-                }
-                console.log("loaded input image");
-              }}
-            />
-            <h2>Input Image</h2>
-          </div>
-        {/if}
+        <div class="flex flex-row space-x-4 max-w-1/3">
+          {#if inputImageUrl}
+            <div class="flex flex-col space-y-4 items-center">
+              <img
+                src={inputImageUrl}
+                alt="Input Image Alt"
+                bind:this={inputImageElement}
+              />
+              <h2>Input Image</h2>
+            </div>
+          {/if}
+          {#if processedImageUrl}
+            <div class="flex flex-col space-y-4 items-center">
+              <img src={processedImageUrl} alt="Processed Image Alt" />
+              <h2>Processed Image</h2>
+            </div>
+          {/if}
+        </div>
       {/if}
       <div class="flex flex-row space-x-4"></div>
     </div>
